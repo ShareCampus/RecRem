@@ -2,10 +2,11 @@ package database
 
 import (
 	"fmt"
+	"os"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	glog "gorm.io/gorm/logger"
-	"os"
 )
 
 func SetupDB(database *gorm.DB) *gorm.DB {

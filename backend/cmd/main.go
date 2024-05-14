@@ -2,11 +2,12 @@ package main
 
 import (
 	"flag"
+	"os"
+
 	"github.com/ShareCampus/RecRem/backend/pkg/database"
 	"github.com/ShareCampus/RecRem/backend/pkg/recrem"
 	"github.com/ShareCampus/RecRem/backend/pkg/utils/logger"
 	"github.com/joho/godotenv"
-	"os"
 )
 
 const HTTP_LISTEN_PORT_STR = "HTTP_LISTEN_PORT"
