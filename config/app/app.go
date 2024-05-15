@@ -1,8 +1,6 @@
 package app
 
 import (
-	"recrem/config/db"
-	"recrem/config/migrate"
 	"recrem/config/setting"
 	"recrem/routers"
 
@@ -16,16 +14,16 @@ func InitApp() *gin.Engine {
 	s.InitSetting()
 	s.InitLute()
 	s.InitCache()
-	db.InitDb()
-	migrate.Migrate()
+	// db.InitDb()
+	// migrate.Migrate()
 	gin.SetMode(setting.Config.Server.Mode)
 
 	// 加载中间件
 	router := gin.New()
 	// 加载路由
 	apiRouter := routers.ApiRouter{}
-	tmplRouter := routers.TmplRouter{}
-	tmplRouter.InitTemplateRouter("", router)
+	// tmplRouter := routers.TmplRouter{}
+	// tmplRouter.InitTemplateRouter("", router)
 	apiRouter.InitApiRouter("/api/v1", router)
 
 	return router
