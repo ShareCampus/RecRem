@@ -41,3 +41,25 @@ func (user User) Create() error {
 
 	return db.Db.Create(&user).Error
 }
+
+// GetByEmail 根据邮箱获取用户
+func (user User) GetByEmail() (User, error) {
+	u := User{}
+	err := db.Db.Where("`email` = ?", user.Email).First(&u).Error
+	if gorm.IsRecordNotFoundError(err) {
+		err = nil
+	}
+
+	return u, err
+}
+
+// UpdatePwd 修改密码
+func (user User) UpdatePwd() error {
+	hashedPwd, err := utils.EncryptPwd(user.Pwd) // 加密密码
+	if err != nil {
+		return err
+	}
+
+	return db.Db.Model(&User{}).Where("`email` = ?", user.Email).
+		Update("pwd", hashedPwd).Error
+}

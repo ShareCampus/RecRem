@@ -7,8 +7,11 @@ import (
 	"recrem/utils"
 	"time"
 
+	"recrem/models"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/go-gomail/gomail"
 )
 
 type AuthHandler struct {
@@ -41,6 +44,7 @@ func (a *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 	if err := user.Create(); err != nil { // 创建用户 + 异常处理
+		// log.Logger.Sugar().Error("error: ", err.Error())
 		result.Code = utils.ServerError
 		result.Msg = "服务器端错误"
 		ctx.JSON(http.StatusOK, result) // 返回 json
@@ -98,6 +102,7 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 		},
 	})
 	if err != nil { // 异常处理
+		// log.Logger.Sugar().Error("error: ", err.Error())
 		result.Code = utils.ServerError
 		result.Msg = "服务器端错误"
 		ctx.JSON(http.StatusOK, result) // 返回 json
@@ -110,4 +115,151 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 		UserImg:  u.UserImg,
 	}
 	ctx.JSON(http.StatusOK, result)
+}
+
+// CreateCaptcha
+// @Summary 创建验证码
+// @Tags 授权
+// @version 1.0
+// @Accept application/json
+// @Success 100 object utils.Result 成功
+// @Failure 103/104 object utils.Result 失败
+// @Router /api/v1/auth/captcha [get]
+func (a *AuthHandler) CreateCaptcha(ctx *gin.Context) {
+	captcha := utils.CaptchaConfig{} // 创建验证码配置结构
+	result := utils.Result{          // 返回数据结构
+		Code: utils.Success,
+		Msg:  "验证码创建成功",
+		Data: nil,
+	}
+
+	base64, err := utils.GenerateCaptcha(&captcha) // 创建验证码
+	if err != nil {                                // 异常处理
+		result.Code = utils.ServerError
+		result.Msg = "服务器端错误"
+		ctx.JSON(http.StatusOK, result)
+		return
+	}
+
+	result.Data = gin.H{ // 封装 data
+		"captcha_id":  captcha.Id,
+		"captcha_url": base64,
+	}
+
+	ctx.JSON(http.StatusOK, result) // 返回 json 数据
+}
+
+func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
+	forgetPwdForm := forms.ForgetPwdForm{}
+	if err := ctx.ShouldBindJSON(&forgetPwdForm); err != nil {
+		ctx.JSON(http.StatusOK, utils.Result{
+			Code: utils.RequestError,
+			Msg:  utils.GetFormError(err),
+			Data: nil,
+		})
+		return
+	}
+
+	user, _ := models.User{Email: forgetPwdForm.Email}.GetByEmail()
+	if user.Username == "" {
+		ctx.JSON(http.StatusOK, utils.Result{
+			Code: utils.RequestError,
+			Msg:  "不存在该邮箱帐号",
+			Data: nil,
+		})
+		return
+	}
+
+	code := ""
+	_ = setting.Cache.Get(forgetPwdForm.Email, &code)
+	if code == "" {
+		verifyCode, err := utils.CreateRandomCode(6)
+		if err != nil {
+			// log.Logger.Sugar().Error("创建验证码失败：", err.Error())
+			ctx.JSON(http.StatusOK, utils.Result{
+				Code: utils.ServerError,
+				Msg:  "创建验证码失败",
+				Data: nil,
+			})
+			return
+		}
+		code = verifyCode
+		_ = setting.Cache.Set(forgetPwdForm.Email, code, time.Minute*15)
+	}
+
+	msg := gomail.NewMessage()
+	// 设置收件人
+	msg.SetHeader("To", forgetPwdForm.Email)
+	// 设置发件人
+	msg.SetAddressHeader("From", setting.Config.SMTP.Account, setting.Config.SMTP.Account)
+	// 主题
+	msg.SetHeader("Subject", "忘记密码验证")
+	// log.Logger.Sugar().Info("verifyCode: ", code)
+	// 正文
+	msg.SetBody("text/html", utils.GetForgetPwdEmailHTML(user.Username, code))
+	// 设置 SMTP 参数
+	d := gomail.NewDialer(setting.Config.SMTP.Address, setting.Config.SMTP.Port,
+		setting.Config.SMTP.Account, setting.Config.SMTP.Password)
+
+	// 发送
+	err := d.DialAndSend(msg)
+	if err != nil {
+		// log.Logger.Sugar().Error("验证码发送失败：", err.Error())
+		ctx.JSON(http.StatusOK, utils.Result{
+			Code: utils.ServerError,
+			Msg:  "验证码发送失败，请检查 smtp 配置",
+			Data: nil,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, utils.Result{
+		Code: utils.Success,
+		Msg:  "验证码发送成功，请前往邮箱查看",
+		Data: nil,
+	})
+}
+
+func (a *AuthHandler) ResetPwd(ctx *gin.Context) {
+	resetPwdForm := forms.ResetPwdForm{}
+	if err := ctx.ShouldBindJSON(&resetPwdForm); err != nil {
+		ctx.JSON(http.StatusOK, utils.Result{
+			Code: utils.RequestError,
+			Msg:  utils.GetFormError(err),
+			Data: nil,
+		})
+		return
+	}
+
+	verifyCode := ""
+	_ = setting.Cache.Get(resetPwdForm.Email, &verifyCode)
+	if verifyCode != resetPwdForm.VerifyCode {
+		ctx.JSON(http.StatusOK, utils.Result{
+			Code: utils.RequestError,
+			Msg:  "验证码无效或错误",
+			Data: nil,
+		})
+		return
+	}
+
+	user := resetPwdForm.BindToModel()
+	err := user.UpdatePwd()
+	if err != nil {
+		// log.Logger.Sugar().Error("error: ", err.Error())
+		ctx.JSON(http.StatusOK, utils.Result{
+			Code: utils.ServerError,
+			Msg:  "服务器端错误",
+			Data: nil,
+		})
+		return
+	}
+
+	// 删除缓存中的验证码
+	_ = setting.Cache.Delete(resetPwdForm.Email)
+
+	ctx.JSON(http.StatusOK, utils.Result{
+		Code: utils.Success,
+		Msg:  "重置密码成功",
+		Data: nil,
+	})
 }

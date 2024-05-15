@@ -23,6 +23,19 @@ type RegisterForm struct {
 	// ThemeName string `json:"theme_name" binding:"required,max=100" label:"主题"`
 }
 
+// ForgetPwdForm 忘记密码表单
+type ForgetPwdForm struct {
+	Email string `json:"email" binding:"required,max=30,email" label:"邮箱"`
+}
+
+// ResetPwdForm 重置密码表单
+type ResetPwdForm struct {
+	Email      string `json:"email" binding:"required,max=30,email" label:"邮箱"`
+	Pwd        string `json:"pwd" binding:"required,min=6,max=20" label:"密码"`
+	ConfirmPwd string `json:"confirm_pwd" binding:"required,min=6,max=20,eqfield=Pwd" label:"确认密码"`
+	VerifyCode string `json:"verify_code" binding:"required,min=6,max=6" label:"验证码"`
+}
+
 // BindToModel 绑定注册表单到实体结构
 func (form RegisterForm) BindToModel() models.User {
 	return models.User{
@@ -37,5 +50,13 @@ func (form LoginForm) BindToModel() models.User {
 	return models.User{
 		Username: form.Username,
 		Pwd:      form.Pwd,
+	}
+}
+
+// BindToModel 绑定重置密码表单到实体结构
+func (form ResetPwdForm) BindToModel() models.User {
+	return models.User{
+		Pwd:   form.Pwd,
+		Email: form.Email,
 	}
 }
