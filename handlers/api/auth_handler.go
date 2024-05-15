@@ -117,14 +117,6 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, result)
 }
 
-// CreateCaptcha
-// @Summary 创建验证码
-// @Tags 授权
-// @version 1.0
-// @Accept application/json
-// @Success 100 object utils.Result 成功
-// @Failure 103/104 object utils.Result 失败
-// @Router /api/v1/auth/captcha [get]
 func (a *AuthHandler) CreateCaptcha(ctx *gin.Context) {
 	captcha := utils.CaptchaConfig{} // 创建验证码配置结构
 	result := utils.Result{          // 返回数据结构
