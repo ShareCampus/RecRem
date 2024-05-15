@@ -14,9 +14,10 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	authHandler := api.AuthHandler{}
 	authApiRouter := router.Group(rootPath)
 	{
-		authApiRouter.GET("/auth/health", authHandler.Health)
-		authApiRouter.POST("/auth/register", authHandler.Register)
 		authApiRouter.POST("/auth/login", authHandler.Login)
-
+		authApiRouter.POST("/auth/register", authHandler.Register)
+		authApiRouter.GET("/auth/captcha", authHandler.CreateCaptcha)
+		authApiRouter.POST("/auth/pwd/forget", authHandler.ForgetPwd)
+		authApiRouter.POST("/auth/pwd/reset", authHandler.ResetPwd)
 	}
 }
