@@ -15,5 +15,8 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	authApiRouter := router.Group(rootPath)
 	{
 		authApiRouter.GET("/auth/health", authHandler.Health)
+		authApiRouter.POST("/auth/register", authHandler.Register)
+		authApiRouter.POST("/auth/login", authHandler.Login)
+
 	}
 }
