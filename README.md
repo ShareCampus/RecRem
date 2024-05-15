@@ -18,8 +18,6 @@ Recommend all you Remember
 Date : 2024-05-15 22:07:23
 Total : 21 files,  737 codes, 82 comments, 119 blanks, all 938 lines
 
-[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
-
 ## Files
 
 | filename | language | code | comment | blank | total |
