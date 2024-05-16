@@ -63,3 +63,26 @@ func (user User) UpdatePwd() error {
 	return db.Db.Model(&User{}).Where("`email` = ?", user.Email).
 		Update("pwd", hashedPwd).Error
 }
+
+// GetAll 获取所有用户
+func (user User) GetAll() ([]User, error) {
+	var users []User
+	err := db.Db.Select("username, email, nickname, user_img, signature").
+		Find(&users).Error
+	if gorm.IsRecordNotFoundError(err) {
+		err = nil
+	}
+
+	return users, err
+}
+
+// Update 更新用户
+func (user User) Update() error {
+	return db.Db.Model(&User{}).Updates(map[string]interface{}{
+		"username":  user.Username,
+		"email":     user.Email,
+		"nickname":  user.Nickname,
+		"user_img":  user.UserImg,
+		"signature": user.Signature,
+	}).Error
+}
