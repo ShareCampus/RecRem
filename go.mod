@@ -23,6 +23,9 @@ require (
 	github.com/goccy/go-json v0.10.2 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
+	github.com/gorilla/context v1.1.2 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
+	github.com/gorilla/sessions v1.2.2 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
@@ -49,12 +52,14 @@ require (
 	github.com/88250/lute v1.7.6
 	github.com/bradfitz/gomemcache v0.0.0-20230905024940-24af94b03874 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-gomail/gomail v0.0.0-20160411212932-81ebce5c23df
 	github.com/go-playground/universal-translator v0.18.1
 	github.com/go-sql-driver/mysql v1.8.1
-	github.com/gomodule/redigo v1.8.9 // indirect
+	github.com/gomodule/redigo v2.0.0+incompatible // indirect
 	github.com/jinzhu/gorm v1.9.16
+	github.com/juju/ratelimit v1.0.2
 	github.com/memcachier/mc/v3 v3.0.3 // indirect
 	github.com/mojocn/base64Captcha v1.3.1
 	github.com/natefinch/lumberjack v2.0.0+incompatible
