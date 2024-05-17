@@ -20,7 +20,6 @@ type AuthHandler struct {
 
 func (a *AuthHandler) Health(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, "hello world")
-	return
 }
 
 func (a *AuthHandler) Register(ctx *gin.Context) {
