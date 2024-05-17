@@ -8,9 +8,9 @@ server:
   limit_cap: 100 # 间隔时间内最大访问次数
 # 数据库配置
 db:
-  host: "127.0.0.1" # 主机地址
+  host: "47.92.136.141" # 主机地址
   user_name: "root" # 用户名
-  password: "060030" # 密码
+  password: "@Wh060030" # 密码
   database: "recrem" # 数据库名
   port: "3306" # 端口
   time_zone: "Local" # 时区

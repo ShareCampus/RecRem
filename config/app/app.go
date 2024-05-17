@@ -1,6 +1,8 @@
 package app
 
 import (
+	"recrem/config/db"
+	"recrem/config/migrate"
 	"recrem/config/setting"
 	"recrem/routers"
 
@@ -14,8 +16,8 @@ func InitApp() *gin.Engine {
 	s.InitSetting()
 	s.InitLute()
 	s.InitCache()
-	// db.InitDb()
-	// migrate.Migrate()
+	db.InitDb()
+	migrate.Migrate()
 	gin.SetMode(setting.Config.Server.Mode)
 
 	// 加载中间件
