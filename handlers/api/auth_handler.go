@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"recrem/config/setting"
 	"recrem/forms"
+	"recrem/log"
 	"recrem/utils"
 	"time"
 
@@ -44,7 +45,7 @@ func (a *AuthHandler) Register(ctx *gin.Context) {
 		return
 	}
 	if err := user.Create(); err != nil { // 创建用户 + 异常处理
-		// log.Logger.Sugar().Error("error: ", err.Error())
+		log.Logger.Sugar().Error("error: ", err.Error())
 		result.Code = utils.ServerError
 		result.Msg = "服务器端错误"
 		ctx.JSON(http.StatusOK, result) // 返回 json
@@ -101,19 +102,22 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 			IssuedAt: time.Now().Unix(),
 		},
 	})
+
 	if err != nil { // 异常处理
-		// log.Logger.Sugar().Error("error: ", err.Error())
+		log.Logger.Sugar().Error("error: ", err.Error())
 		result.Code = utils.ServerError
 		result.Msg = "服务器端错误"
 		ctx.JSON(http.StatusOK, result) // 返回 json
 		return
 	}
+
 	result.Data = utils.Token{ // 封装 Token 信息
 		Token:    token,
 		UserId:   u.ID,
 		Username: u.Username,
 		UserImg:  u.UserImg,
 	}
+
 	ctx.JSON(http.StatusOK, result)
 }
 
@@ -167,7 +171,7 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 	if code == "" {
 		verifyCode, err := utils.CreateRandomCode(6)
 		if err != nil {
-			// log.Logger.Sugar().Error("创建验证码失败：", err.Error())
+			log.Logger.Sugar().Error("创建验证码失败：", err.Error())
 			ctx.JSON(http.StatusOK, utils.Result{
 				Code: utils.ServerError,
 				Msg:  "创建验证码失败",
@@ -196,7 +200,7 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 	// 发送
 	err := d.DialAndSend(msg)
 	if err != nil {
-		// log.Logger.Sugar().Error("验证码发送失败：", err.Error())
+		log.Logger.Sugar().Error("验证码发送失败：", err.Error())
 		ctx.JSON(http.StatusOK, utils.Result{
 			Code: utils.ServerError,
 			Msg:  "验证码发送失败，请检查 smtp 配置",
@@ -237,7 +241,7 @@ func (a *AuthHandler) ResetPwd(ctx *gin.Context) {
 	user := resetPwdForm.BindToModel()
 	err := user.UpdatePwd()
 	if err != nil {
-		// log.Logger.Sugar().Error("error: ", err.Error())
+		log.Logger.Sugar().Error("error: ", err.Error())
 		ctx.JSON(http.StatusOK, utils.Result{
 			Code: utils.ServerError,
 			Msg:  "服务器端错误",

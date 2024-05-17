@@ -6,6 +6,14 @@ import (
 	"recrem/config/setting"
 )
 
+// @title Gin Swagger
+// @version 1.0
+// @description recrem 开源搜索引擎 API 接口文档
+
+// @license.name Apache 2.0
+// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host localhost:8088
 func main() {
 	engine := app.InitApp() // 初始化
 
