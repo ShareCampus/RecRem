@@ -13,33 +13,39 @@ Recommend all you Remember
 - Raft
 - NoSql
 
-# Details
+# Summary
 
-Date : 2024-05-15 22:07:23
-Total : 21 files,  737 codes, 82 comments, 119 blanks, all 938 lines
+Date : 2024-05-16 12:21:45
 
-## Files
+Total : 25 files,  1366 codes, 146 comments, 192 blanks, all 1704 lines
 
-| filename | language | code | comment | blank | total |
-| :--- | :--- | ---: | ---: | ---: | ---: |
-| [README.md](/README.md) | Markdown | 10 | 0 | 5 | 15 |
-| [config/app/app.go](/config/app/app.go) | Go | 17 | 8 | 6 | 31 |
-| [config/db/db.go](/config/db/db.go) | Go | 35 | 6 | 9 | 50 |
-| [config/develop.yaml](/config/develop.yaml) | YAML | 28 | 5 | 1 | 34 |
-| [config/migrate/migrate.go](/config/migrate/migrate.go) | Go | 8 | 6 | 3 | 17 |
-| [config/product.yaml](/config/product.yaml) | YAML | 28 | 5 | 1 | 34 |
-| [config/setting/setting.go](/config/setting/setting.go) | Go | 70 | 20 | 14 | 104 |
-| [config/setting/varible.go](/config/setting/varible.go) | Go | 10 | 4 | 6 | 20 |
-| [forms/auth_form.go](/forms/auth_form.go) | Go | 29 | 7 | 6 | 42 |
-| [go.mod](/go.mod) | Go Module File | 55 | 0 | 5 | 60 |
-| [go.sum](/go.sum) | Go Checksum File | 167 | 0 | 1 | 168 |
-| [handlers/api/auth_handler.go](/handlers/api/auth_handler.go) | Go | 106 | 0 | 8 | 114 |
-| [log/log.go](/log/log.go) | Go | 1 | 0 | 1 | 2 |
-| [main.go](/main.go) | Go | 11 | 0 | 4 | 15 |
-| [models/user.go](/models/user.go) | Go | 32 | 3 | 9 | 44 |
-| [routers/api_router.go](/routers/api_router.go) | Go | 16 | 1 | 6 | 23 |
-| [utils/bcrypt.go](/utils/bcrypt.go) | Go | 15 | 2 | 6 | 23 |
-| [utils/captcha.go](/utils/captcha.go) | Go | 16 | 2 | 5 | 23 |
-| [utils/jwt.go](/utils/jwt.go) | Go | 32 | 6 | 9 | 47 |
-| [utils/response.go](/utils/response.go) | Go | 19 | 4 | 4 | 27 |
-| [utils/validator.go](/utils/validator.go) | Go | 32 | 3 | 10 | 45 |
+## Languages
+
+| language | files | code | comment | blank | total |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| Go | 20 | 1,059 | 136 | 175 | 1,370 |
+| Go Checksum File | 1 | 158 | 0 | 1 | 159 |
+| Go Module File | 1 | 56 | 0 | 5 | 61 |
+| YAML | 2 | 56 | 10 | 2 | 68 |
+| Markdown | 1 | 37 | 0 | 9 | 46 |
+
+## Directories
+
+| path | files | code | comment | blank | total |
+| :--- | ---: | ---: | ---: | ---: | ---: |
+| . | 25 | 1,366 | 146 | 192 | 1,704 |
+| . (Files) | 4 | 262 | 0 | 19 | 281 |
+| config | 7 | 196 | 54 | 40 | 290 |
+| config (Files) | 2 | 56 | 10 | 2 | 68 |
+| config\\app | 1 | 17 | 8 | 6 | 31 |
+| config\\db | 1 | 35 | 6 | 9 | 50 |
+| config\\migrate | 1 | 8 | 6 | 3 | 17 |
+| config\\setting | 2 | 80 | 24 | 20 | 124 |
+| forms | 2 | 70 | 13 | 14 | 97 |
+| handlers | 2 | 315 | 43 | 38 | 396 |
+| handlers\\api | 2 | 315 | 43 | 38 | 396 |
+| log | 1 | 1 | 0 | 1 | 2 |
+| middlewares | 1 | 37 | 3 | 7 | 47 |
+| models | 1 | 66 | 7 | 16 | 89 |
+| routers | 1 | 26 | 2 | 7 | 35 |
+| utils | 6 | 393 | 24 | 50 | 467 |
