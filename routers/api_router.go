@@ -15,6 +15,7 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	// 注册功能
 	authHandler := api.AuthHandler{}
 	userHandler := api.UserHandler{}
+	fileHandler := api.FileHandler{}
 	authApiRouter := router.Group(rootPath)
 	{
 		authApiRouter.POST("/auth/login", authHandler.Login)
@@ -31,7 +32,11 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 		userApiRouter.PUT("/users", middlewares.JWTAuth(), userHandler.UpdateUser)
 		userApiRouter.PUT("/users/pwd", middlewares.JWTAuth(), userHandler.UpdateUserPwd)
 	}
-	// 增加
 
-	// 查询
+	// 文件信息
+	fileApiRouter := router.Group(rootPath)
+	{
+		fileApiRouter.POST("/upload_file", fileHandler.UploadFile) // 单文件上传
+	}
+
 }
