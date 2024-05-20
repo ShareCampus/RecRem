@@ -36,7 +36,8 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	// 文件信息
 	fileApiRouter := router.Group(rootPath)
 	{
-		fileApiRouter.POST("/upload_file", fileHandler.UploadFile) // 单文件上传
+		fileApiRouter.POST("/upload_file", fileHandler.UploadFile)   // 单文件上传
+		fileApiRouter.POST("/upload_files", fileHandler.UploadFiles) // 多文件上传
 	}
 
 }
