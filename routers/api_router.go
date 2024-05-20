@@ -31,4 +31,7 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 		userApiRouter.PUT("/users", middlewares.JWTAuth(), userHandler.UpdateUser)
 		userApiRouter.PUT("/users/pwd", middlewares.JWTAuth(), userHandler.UpdateUserPwd)
 	}
+	// 增加
+
+	// 查询
 }

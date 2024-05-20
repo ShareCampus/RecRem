@@ -63,7 +63,8 @@ func InitApp() *gin.Engine {
 	}
 	// 加载路由
 	apiRouter := routers.ApiRouter{}
+	tmplRouter := routers.TmplRouter{}
+	tmplRouter.InitTemplateRouter("", router)
 	apiRouter.InitApiRouter("/api/v1", router)
-
 	return router
 }

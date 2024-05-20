@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"recrem/config/app"
 	"recrem/config/setting"
+	_ "recrem/docs"
 )
 
 // @title Gin Swagger
