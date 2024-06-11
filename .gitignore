@@ -25,3 +25,4 @@ TestResults.xml
 .VsCodeCounter/
 
 *.log
+.DS_Store
