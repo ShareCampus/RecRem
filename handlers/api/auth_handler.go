@@ -10,7 +10,6 @@ import (
 
 	"recrem/models"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"github.com/go-gomail/gomail"
 )
@@ -66,16 +65,16 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 		ctx.JSON(http.StatusOK, result)      // 返回 json
 		return
 	}
-	captchaConfig := &utils.CaptchaConfig{
-		Id:          loginForm.CaptchaId,
-		VerifyValue: loginForm.CaptchaVal,
-	}
-	if !utils.CaptchaVerify(captchaConfig) { // 校验验证码
-		result.Code = utils.RequestError // 请求数据有误
-		result.Msg = "验证码错误"
-		ctx.JSON(http.StatusOK, result) // 返回 json
-		return
-	}
+	// captchaConfig := &utils.CaptchaConfig{
+	// 	Id:          loginForm.CaptchaId,
+	// 	VerifyValue: loginForm.CaptchaVal,
+	// }
+	// if !utils.CaptchaVerify(captchaConfig) { // 校验验证码
+	// 	result.Code = utils.RequestError // 请求数据有误
+	// 	result.Msg = "验证码错误"
+	// 	ctx.JSON(http.StatusOK, result) // 返回 json
+	// 	return
+	// }
 	user := loginForm.BindToModel() // 绑定表单数据到实体类
 	u, _ := user.GetByUsername()    // 根据用户名获取用户
 	if u.Username == "" {           // 用户不存在
@@ -91,31 +90,31 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 		return
 	}
 
-	j := utils.NewJWT()                             // 创建一个jwt
-	token, err := j.CreateToken(utils.CustomClaims{ // 生成 JWT token
-		Username: u.Username,
-		UserImg:  u.UserImg,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Second * time.
-				Duration(setting.Config.Server.TokenExpireTime)).Unix(), // 设置过期时间
-			IssuedAt: time.Now().Unix(),
-		},
-	})
+	// j := utils.NewJWT()                             // 创建一个jwt
+	// token, err := j.CreateToken(utils.CustomClaims{ // 生成 JWT token
+	// 	Username: u.Username,
+	// 	UserImg:  u.UserImg,
+	// 	StandardClaims: jwt.StandardClaims{
+	// 		ExpiresAt: time.Now().Add(time.Second * time.
+	// 			Duration(setting.Config.Server.TokenExpireTime)).Unix(), // 设置过期时间
+	// 		IssuedAt: time.Now().Unix(),
+	// 	},
+	// })
 
-	if err != nil { // 异常处理
-		log.Logger.Sugar().Error("error: ", err.Error())
-		result.Code = utils.ServerError
-		result.Msg = "服务器端错误"
-		ctx.JSON(http.StatusOK, result) // 返回 json
-		return
-	}
+	// if err != nil { // 异常处理
+	// 	log.Logger.Sugar().Error("error: ", err.Error())
+	// 	result.Code = utils.ServerError
+	// 	result.Msg = "服务器端错误"
+	// 	ctx.JSON(http.StatusOK, result) // 返回 json
+	// 	return
+	// }
 
-	result.Data = utils.Token{ // 封装 Token 信息
-		Token:    token,
-		UserId:   u.ID,
-		Username: u.Username,
-		UserImg:  u.UserImg,
-	}
+	// result.Data = utils.Token{ // 封装 Token 信息
+	// 	Token:    token,
+	// 	UserId:   u.ID,
+	// 	Username: u.Username,
+	// 	UserImg:  u.UserImg,
+	// }
 
 	ctx.JSON(http.StatusOK, result)
 }
