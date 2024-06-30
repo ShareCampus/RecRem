@@ -5,6 +5,7 @@ import (
 	"recrem/config/db"
 	"recrem/config/migrate"
 	"recrem/config/setting"
+	"recrem/gpt/openai"
 	logger "recrem/log"
 	"recrem/routers"
 
@@ -19,6 +20,7 @@ func InitApp() *gin.Engine {
 	s.InitLute()
 	s.InitCache()
 	db.InitDb()
+	openai.Init()
 	migrate.Migrate()
 	gin.SetMode(setting.Config.Server.Mode)
 

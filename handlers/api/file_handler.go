@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/gin-gonic/gin"
@@ -37,6 +38,26 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error saving the file: %v", err))
 		return
 	}
+
+	// 执行脚本获取文本中的内容
+	pythonPath := "python3"
+	scriptPath := "./utils/extract.py"
+
+	cmd := exec.Command(pythonPath, scriptPath, filePath)
+	output, err := cmd.Output()
+	if err != nil {
+		fmt.Println("Error executing script:", err)
+		return
+	}
+	fmt.Println("Output from Python script:")
+	fmt.Println(string(output))
+
+	// 将内容进行总结
+
+	// 将内容进行向量化操作
+
+	// 存储到数据库中
+
 	ctx.String(http.StatusOK, fmt.Sprintf("File uploaded successfully: %s", handler.Filename))
 }
 
