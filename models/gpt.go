@@ -8,6 +8,10 @@ type OpenAI struct {
 	Model string `gorm:"column:model"`
 }
 
+func (o *OpenAI) TableName() string {
+	return "openai"
+}
+
 type ChatResponse struct {
 	ID      string `json:"id"`
 	Object  string `json:"object"`

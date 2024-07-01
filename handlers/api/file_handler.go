@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"recrem/gpt/openai"
+	"recrem/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -55,9 +57,22 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 	// 将内容进行总结
 
 	// 将内容进行向量化操作
-
+	prompt := models.EmbeddingRequest{
+		Input:          string(output),
+		Model:          "text-embedding-3-small",
+		EncodingFormat: "float",
+	}
+	resp, err := openai.O.CallEmbeddingAPI(&prompt)
+	if err != nil {
+		fmt.Println("call embedding api error", err)
+	}
 	// 存储到数据库中
-
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		fmt.Println("Error reading response body:", err)
+		return
+	}
+	fmt.Println("Response body:", string(body))
 	ctx.String(http.StatusOK, fmt.Sprintf("File uploaded successfully: %s", handler.Filename))
 }
 

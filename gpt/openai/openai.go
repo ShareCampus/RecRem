@@ -32,19 +32,19 @@ func NewOpenAI() *OpenAI {
 	return &OpenAI{}
 }
 
-var o *OpenAI
+var O *OpenAI
 
 // var _ gpt.GPT = &OpenAI{} // 类型断言
 
 func InitGpt() {
+	O = NewOpenAI()
 	var accessKeys []models.OpenAI
 	if err := db.Db.Model(models.OpenAI{}).Find(&accessKeys).Error; err != nil {
 		panic(err)
 	}
-
-	o.accessKeyChan = make(chan models.OpenAI, len(accessKeys))
+	O.accessKeyChan = make(chan models.OpenAI, len(accessKeys))
 	for _, key := range accessKeys {
-		o.accessKeyChan <- key
+		O.accessKeyChan <- key
 	}
 }
 
@@ -82,8 +82,8 @@ func (o *OpenAI) GetToken() (string, error) {
 
 func getAccessKey() (*models.OpenAI, error) {
 	select {
-	case key := <-o.accessKeyChan:
-		o.accessKeyChan <- key
+	case key := <-O.accessKeyChan:
+		O.accessKeyChan <- key
 		return &key, nil
 	case <-time.After(time.Second * DefaultChannelTimeoutSecond):
 		return nil, errors.New("no access key available")
