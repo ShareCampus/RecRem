@@ -20,7 +20,7 @@ func InitApp() *gin.Engine {
 	s.InitLute()
 	s.InitCache()
 	db.InitDb()
-	openai.Init()
+	openai.InitGpt()
 	migrate.Migrate()
 	gin.SetMode(setting.Config.Server.Mode)
 

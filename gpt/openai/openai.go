@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"recrem/config/db"
 	"recrem/models"
-	"recrem/prompts"
 	"recrem/utils"
 	"strings"
 	"time"
@@ -37,7 +36,7 @@ var o *OpenAI
 
 // var _ gpt.GPT = &OpenAI{} // 类型断言
 
-func Init() {
+func InitGpt() {
 	var accessKeys []models.OpenAI
 	if err := db.Db.Model(models.OpenAI{}).Find(&accessKeys).Error; err != nil {
 		panic(err)
@@ -49,12 +48,11 @@ func Init() {
 	}
 }
 
-func (o *OpenAI) CallEmbeddingAPI(prompt *prompts.EmbeddingRequest) (*http.Response, error) {
+func (o *OpenAI) CallEmbeddingAPI(prompt *models.EmbeddingRequest) (*http.Response, error) {
 	token, err := o.GetToken()
 	if err != nil {
 		return nil, err
 	}
-
 	request, err := http.NewRequest(http.MethodPost, EmbeddingEndPoint, bytes.NewBuffer(prompt.Decode()))
 	if err != nil {
 		return nil, err
@@ -92,30 +90,6 @@ func getAccessKey() (*models.OpenAI, error) {
 	}
 }
 
-type ChatResponse struct {
-	ID      string `json:"id"`
-	Object  string `json:"object"`
-	Created int    `json:"created"`
-	Model   string `json:"model"`
-	Choices []struct {
-		Index        int    `json:"index"`
-		FinishReason string `json:"finish_reason"`
-		Delta        struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"delta"`
-		Message struct {
-			Role    string `json:"role"`
-			Content string `json:"content"`
-		} `json:"message"`
-	} `json:"choices"`
-	Usage struct {
-		CompletionTokens int `json:"completion_tokens"`
-		PromptTokens     int `json:"prompt_tokens"`
-		TotalTokens      int `json:"total_tokens"`
-	} `json:"usage"`
-}
-
 func (o *OpenAI) ParseResponse(stream io.Reader) (int, string, error) {
 	data, err := io.ReadAll(stream)
 	if err != nil {
@@ -133,7 +107,7 @@ func (o *OpenAI) ParseResponse(stream io.Reader) (int, string, error) {
 	return utils.NumTokensFromMessages(result, model), result, nil
 }
 
-func chatResponses(input string) (gptModel string, chatresponses []ChatResponse) {
+func chatResponses(input string) (gptModel string, chatresponses []models.ChatResponse) {
 	lines := strings.Split(input, "\n")
 	for _, line := range lines {
 		if len(line) == 0 {
@@ -145,7 +119,7 @@ func chatResponses(input string) (gptModel string, chatresponses []ChatResponse)
 			break
 		}
 
-		var response ChatResponse
+		var response models.ChatResponse
 		if err := json.Unmarshal([]byte(jsonStr), &response); err != nil {
 			logger.Errorf("marshal json error: %v", err)
 			continue
