@@ -12,3 +12,4 @@ Recommend all you Remember
 - Mysql
 - Raft
 - MangoDB
+- [weaviate](https://github.com/weaviate/weaviate?tab=readme-ov-file)
