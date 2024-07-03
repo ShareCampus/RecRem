@@ -89,6 +89,5 @@ func (f *FileHandler) DeleteFile(ctx *gin.Context) {
 		}
 		return
 	}
-
 	ctx.String(http.StatusOK, fmt.Sprintf("File deleted successfully: %s", fileName))
 }

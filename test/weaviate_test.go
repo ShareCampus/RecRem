@@ -8,20 +8,20 @@ import (
 	"os"
 
 	"github.com/weaviate/weaviate-go-client/v4/weaviate"
-	"github.com/weaviate/weaviate-go-client/v4/weaviate/auth"
 	"github.com/weaviate/weaviate/entities/models"
 )
 
 func main() {
 	weaviateUrl := os.Getenv("WEAVIATE_URL")
 	weaviateKey := os.Getenv("WEAVIATE_API_KEY")
+	openai_key := os.Getenv("OPENAI_KEY")
 	fmt.Println(weaviateKey, weaviateUrl)
 	cfg := weaviate.Config{
-		Host:       weaviateUrl, // Replace with your Weaviate endpoint
-		Scheme:     "http",
-		AuthConfig: auth.ApiKey{Value: weaviateKey}, // Replace with your Weaviate instance API key
+		Host:   weaviateUrl, // Replace with your Weaviate endpoint
+		Scheme: "http",
+		// AuthConfig: auth.ApiKey{Value: weaviateKey}, // Replace with your Weaviate instance API key
 		Headers: map[string]string{
-			"X-OpenAI-Api-Key": "your openai key", // Replace with your inference API key
+			"X-OpenAI-Api-Key": openai_key, // Replace with your inference API key
 		},
 		// Headers: nil,
 	}
@@ -37,18 +37,18 @@ func main() {
 	}
 	fmt.Println("数据库链接成功", live)
 
-	// add the schema
-	classObj := &models.Class{
-		Class:      "Question",
-		Vectorizer: "text2vec-openai",
-		ModuleConfig: map[string]interface{}{
-			"generative-openai": map[string]interface{}{},
-		},
-	}
+	// // add the schema
+	// classObj := &models.Class{
+	// 	Class:      "Question1",
+	// 	Vectorizer: "text2vec-openai",
+	// 	ModuleConfig: map[string]interface{}{
+	// 		"generative-openai": map[string]interface{}{},
+	// 	},
+	// }
 
-	if client.Schema().ClassCreator().WithClass(classObj).Do(context.Background()) != nil {
-		panic(err)
-	}
+	// if err = client.Schema().ClassCreator().WithClass(classObj).Do(context.Background()); err != nil {
+	// 	panic(err)
+	// }
 
 	// Retrieve the data
 	items, err := getJSONdata()
@@ -60,7 +60,7 @@ func main() {
 	objects := make([]*models.Object, len(items))
 	for i := range items {
 		objects[i] = &models.Object{
-			Class: "Question",
+			Class: "Question1",
 			Properties: map[string]any{
 				"category": items[i]["Category"],
 				"question": items[i]["Question"],
