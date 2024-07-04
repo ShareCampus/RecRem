@@ -13,3 +13,4 @@ Recommend all you Remember
 - Raft
 - MangoDB
 - [weaviate](https://github.com/weaviate/weaviate?tab=readme-ov-file)
+- [etcd](https://github.com/etcd-io/etcd)

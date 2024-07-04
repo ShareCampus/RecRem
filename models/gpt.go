@@ -42,6 +42,20 @@ type EmbeddingRequest struct {
 	EncodingFormat string `json:"encoding_format"`
 }
 
+type EmbeddingResponse struct {
+	Object string `json:"object"`
+	Data   []struct {
+		Object    string    `json:"object"`
+		Embedding []float64 `json:"embedding"`
+		Index     int       `json:"index"`
+	} `json:"data"`
+	Model string `json:"model"`
+	Usage struct {
+		PromptTokens int `json:"prompt_tokens"`
+		TotalTokens  int `json:"total_tokens"`
+	} `json:"usage"`
+}
+
 func (e *EmbeddingRequest) Decode() []byte {
 	data, _ := json.Marshal(e)
 	return data

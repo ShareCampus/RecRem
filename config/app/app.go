@@ -3,6 +3,7 @@ package app
 import (
 	"log"
 	"recrem/config/db"
+	"recrem/config/etcd"
 	"recrem/config/migrate"
 	"recrem/config/setting"
 	"recrem/gpt/openai"
@@ -17,14 +18,15 @@ func InitApp() *gin.Engine {
 	// 加载配置
 	s := setting.Setting{}
 	s.InitSetting()
-	s.InitLute()
-	s.InitCache()
-	db.InitDb()
-	openai.InitGpt()
-	migrate.Migrate()
+	// s.InitLute()
+	// s.InitCache()
+	db.InitDb()       // init db
+	etcd.InitEtcd()   // init etcd
+	openai.InitGpt()  // init gpt
+	migrate.Migrate() // migreate db
 	gin.SetMode(setting.Config.Server.Mode)
 
-	// 加载中间件
+	// load middleware
 	router := gin.New()
 	err := logger.InitLogger(
 		setting.Config.Logger.FileName,
@@ -53,7 +55,8 @@ func InitApp() *gin.Engine {
 	// 		return name
 	// 	})
 	// }
-	// 加载路由
+
+	// load router
 	apiRouter := routers.ApiRouter{}
 	tmplRouter := routers.TmplRouter{}
 	tmplRouter.InitTemplateRouter("", router)

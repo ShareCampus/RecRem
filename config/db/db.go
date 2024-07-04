@@ -12,10 +12,8 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/mysql" // gorm mysql
 )
 
-// Db 数据库对象
 var Db *gorm.DB
 
-// 获取数据库连接
 func getDataSource() string {
 	dataSource := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=%s",
 		setting.Config.Database.UserName,
@@ -28,21 +26,14 @@ func getDataSource() string {
 	return dataSource
 }
 
-// InitDb 初始化数据库连接
 func InitDb() {
 	var err error
-
-	//连接数据库
 	Db, err = gorm.Open("mysql", getDataSource())
 	if err != nil {
 		log.Panic("数据库连接错误：", err.Error())
 	}
-
-	// 设置连接池参数
 	Db.DB().SetMaxIdleConns(setting.Config.Database.MaxIdleConn)
 	Db.DB().SetMaxOpenConns(setting.Config.Database.MaxOpenConn)
-
-	// 开发环境下开启 sql 日志
 	if setting.Config.Server.Mode == gin.DebugMode {
 		Db.LogMode(true)
 	}
