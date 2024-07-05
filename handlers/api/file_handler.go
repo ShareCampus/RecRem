@@ -12,6 +12,7 @@ import (
 	"recrem/config/etcd"
 	"recrem/gpt/openai"
 	"recrem/models"
+	"recrem/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +24,8 @@ const (
 type FileHandler struct{}
 
 func (f *FileHandler) UploadFile(ctx *gin.Context) {
+	userID := ctx.Query("user_id")
+	fmt.Println(userID)
 	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, 10<<20)
 
 	file, handler, err := ctx.Request.FormFile("file")
@@ -49,8 +52,11 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 
 	// run the script and get the file content
 	pythonPath := "python3"
-	scriptPath := "./utils/extract.py"
-
+	scriptPath := "./script/extract.py"
+	fileID, err := utils.HashFile(filePath)
+	if err != nil {
+		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error hash the file: %v", err))
+	}
 	cmd := exec.Command(pythonPath, scriptPath, filePath) // ignore_security_alert RCE
 	output, err := cmd.Output()
 	if err != nil {
@@ -88,12 +94,13 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 	// }
 
 	// Put the JSON data into etcd
-	_, err = etcd.EtcdIns.Put(ctx, "test_key", string(body))
+	fileEtcdKey := userID + fileID
+	_, err = etcd.EtcdIns.Put(ctx, fileEtcdKey, string(body))
 	if err != nil {
 		log.Fatalf("Failed to put data into etcd: %v", err)
 	}
 	// Get the data back from etcd
-	value, err := etcd.EtcdIns.Get(ctx, "test_key")
+	value, err := etcd.EtcdIns.Get(ctx, fileEtcdKey)
 	if err != nil {
 		log.Fatalf("Failed to get data from etcd: %v", err)
 	}
