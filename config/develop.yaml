@@ -17,6 +17,12 @@ db:
 #  time_zone: "Asia/Shanghai" # 时区
   max_idle_conn: 10 # 最大空闲连接数
   max_open_conn: 20 # 最大打开连接数
+etcd:
+  host: "127.0.0.1"
+  username: "root"
+  password: "@Wh060030"
+  timeout: 10 # 超时时间（秒）
+  port: "2379"
 # 日志配置
 logger:
   file_name: "recrem.log" # 日志文件

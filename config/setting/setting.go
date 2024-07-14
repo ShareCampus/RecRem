@@ -16,8 +16,18 @@ import (
 type Setting struct {
 	Server   server   `yaml:"server"`
 	Database database `yaml:"db"`
+	Etcd     etcd     `yaml:"etcd"`
 	Logger   logger   `yaml:"logger"`
 	SMTP     smtp     `yaml:"smtp"`
+}
+
+// etcd 配置
+type etcd struct {
+	Host     string `yaml:"host"`     // ip地址
+	Username string `yaml:"username"` // 用户名
+	Password string `yaml:"password"` // 密码
+	Timeout  int    `yaml:"timeout"`  // 超时时间
+	Port     string `yaml:"port"`     // 端口号
 }
 
 // server 服务器配置

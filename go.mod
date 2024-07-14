@@ -12,6 +12,7 @@ require (
 	github.com/swaggo/swag v1.16.3
 	github.com/weaviate/weaviate v1.25.1
 	github.com/weaviate/weaviate-go-client/v4 v4.14.0
+	go.etcd.io/etcd/api/v3 v3.5.14
 	go.etcd.io/etcd/client/v3 v3.5.14
 	golang.org/x/crypto v0.23.0
 	gopkg.in/yaml.v2 v2.4.0
@@ -69,7 +70,6 @@ require (
 	github.com/stretchr/objx v0.5.2 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.2.12 // indirect
-	go.etcd.io/etcd/api/v3 v3.5.14 // indirect
 	go.etcd.io/etcd/client/pkg/v3 v3.5.14 // indirect
 	go.mongodb.org/mongo-driver v1.14.0 // indirect
 	go.uber.org/multierr v1.10.0 // indirect

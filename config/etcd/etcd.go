@@ -3,6 +3,7 @@ package etcd
 import (
 	"context"
 	"log"
+	"recrem/config/setting"
 	"sync"
 	"time"
 
@@ -19,10 +20,10 @@ var (
 func InitEtcd() {
 	once.Do(func() {
 		cfg := clientv3.Config{
-			Endpoints:   []string{"localhost:2379"},
-			DialTimeout: 5 * time.Second,
-			Username:    "root",
-			Password:    "@Wh060030",
+			Endpoints:   []string{setting.Config.Etcd.Host + ":" + setting.Config.Etcd.Port}, // 会出现集群
+			DialTimeout: time.Duration(setting.Config.Etcd.Timeout),
+			Username:    setting.Config.Etcd.Host,
+			Password:    setting.Config.Etcd.Password,
 		}
 
 		cli, err := clientv3.New(cfg)

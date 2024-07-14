@@ -13,6 +13,7 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	authHandler := api.AuthHandler{}
 	userHandler := api.UserHandler{}
 	fileHandler := api.FileHandler{}
+	queryHandler := api.QueryHandler{}
 
 	authApiRouter := router.Group(rootPath)
 	{
@@ -39,5 +40,10 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	{
 		fileApiRouter.POST("/file/upload", fileHandler.UploadFile)
 		fileApiRouter.DELETE("/file/delete", fileHandler.DeleteFile)
+	}
+
+	queryApiRouter := router.Group(rootPath)
+	{
+		queryApiRouter.POST("query/question", queryHandler.QueryByQuestion)
 	}
 }
