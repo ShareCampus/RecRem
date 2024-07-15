@@ -1,6 +1,8 @@
 package api
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +14,6 @@ import (
 	"recrem/config/etcd"
 	"recrem/gpt/openai"
 	"recrem/models"
-	"recrem/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -35,7 +36,20 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 	}
 	defer file.Close()
 
+	// Calculate the hash of the file content directly from the HTTP request
+	hasher := sha256.New()
+	if _, err := io.Copy(hasher, file); err != nil {
+		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error hashing the file: %v", err))
+		return
+	}
+	fileHash := hex.EncodeToString(hasher.Sum(nil))
+
+	// Use the hash as the file name
+	handler.Filename = userID + fileHash + ".md"
 	filePath := filepath.Join(FILESTORAGEPATH, handler.Filename)
+
+	// Rewind the file reader since io.Copy above has exhausted it
+	file.Seek(0, 0)
 
 	destFile, err := os.Create(filePath)
 	if err != nil {
@@ -53,10 +67,6 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 	// run the script and get the file content
 	pythonPath := "python3"
 	scriptPath := "./script/extract.py"
-	fileID, err := utils.HashFile(filePath)
-	if err != nil {
-		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error hash the file: %v", err))
-	}
 	cmd := exec.Command(pythonPath, scriptPath, filePath) // ignore_security_alert RCE
 	output, err := cmd.Output()
 	if err != nil {
@@ -67,7 +77,7 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 	fmt.Println(string(output))
 
 	// TODO summerize the content
-	// vertor embedding
+	// vector embedding
 	prompt := models.EmbeddingRequest{
 		Input:          string(output),
 		Model:          "text-embedding-3-small",
@@ -84,17 +94,8 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 		return
 	}
 
-	// etcd.EtcdIns.Put(ctx, "test_key", string(body))
-	// value, err := etcd.EtcdIns.Get(ctx, "test_key")
-	// embeddingResp := models.EmbeddingResponse{}
-	// err = json.Unmarshal(value, &embeddingResp)
-	// if err != nil {
-	// 	fmt.Println("Error unmarshalling response:", err)
-	// 	return
-	// }
-
 	// Put the JSON data into etcd
-	fileEtcdKey := userID + fileID
+	fileEtcdKey := userID + fileHash
 	_, err = etcd.EtcdIns.Put(ctx, fileEtcdKey, string(body))
 	if err != nil {
 		log.Fatalf("Failed to put data into etcd: %v", err)
@@ -123,7 +124,7 @@ func (f *FileHandler) UploadFile(ctx *gin.Context) {
 func (f *FileHandler) DeleteFile(ctx *gin.Context) {
 	fileName := ctx.Query("filename")
 	log.Println("delte filename", fileName)
-	filePath := filepath.Join("./", fileName)
+	filePath := filepath.Join(FILESTORAGEPATH, fileName)
 	err := os.Remove(filePath) // ignore_security_alert
 	if err != nil {
 		if os.IsNotExist(err) {

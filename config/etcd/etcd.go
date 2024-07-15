@@ -21,8 +21,8 @@ func InitEtcd() {
 	once.Do(func() {
 		cfg := clientv3.Config{
 			Endpoints:   []string{setting.Config.Etcd.Host + ":" + setting.Config.Etcd.Port}, // 会出现集群
-			DialTimeout: time.Duration(setting.Config.Etcd.Timeout),
-			Username:    setting.Config.Etcd.Host,
+			DialTimeout: time.Second * time.Duration(setting.Config.Etcd.Timeout),
+			Username:    setting.Config.Etcd.Username,
 			Password:    setting.Config.Etcd.Password,
 		}
 
