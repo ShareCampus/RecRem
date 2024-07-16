@@ -19,7 +19,8 @@ import (
 )
 
 const (
-	FILESTORAGEPATH = "./storage/"
+	TEMPFILESTORAGEPATH = "./storage/temp/"
+	FILESTORAGEPATH     = "./storage/"
 )
 
 type FileHandler struct{}
