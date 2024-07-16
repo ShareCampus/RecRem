@@ -45,5 +45,6 @@ func (a *ApiRouter) InitApiRouter(rootPath string, router *gin.Engine) {
 	queryApiRouter := router.Group(rootPath)
 	{
 		queryApiRouter.POST("query/question", queryHandler.QueryByQuestion)
+		queryApiRouter.POST("query/file", queryHandler.QueryByFile)
 	}
 }

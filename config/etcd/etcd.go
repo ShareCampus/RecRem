@@ -2,8 +2,11 @@ package etcd
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 	"recrem/config/setting"
+	"recrem/models"
 	"sync"
 	"time"
 
@@ -49,4 +52,23 @@ func GetEtcdClient() *clientv3.Client {
 		log.Fatal("Etcd client is not initialized. Call InitEtcd() first.")
 	}
 	return EtcdIns
+}
+
+// input: prefix string
+// output: embedding vectors
+func GetVectorsThroughPrefix(prefix string) ([][]float64, error) {
+	userFilesEmbedding, err := EtcdIns.Get(context.Background(), prefix, clientv3.WithPrefix())
+	if err != nil {
+		return nil, fmt.Errorf("error getting files embedding vectors: %s", err)
+	}
+	embeddingArrs := make([][]float64, 0)
+	for _, kv := range userFilesEmbedding.Kvs {
+		embeddingResp := models.EmbeddingResponse{}
+		err = json.Unmarshal(kv.Value, &embeddingResp)
+		if err != nil {
+			return nil, fmt.Errorf("error unmarshalling response in GetVectorsThroughUserID: %s", err)
+		}
+		embeddingArrs = append(embeddingArrs, embeddingResp.Data[0].Embedding)
+	}
+	return embeddingArrs, nil
 }
