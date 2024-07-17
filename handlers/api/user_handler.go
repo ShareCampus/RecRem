@@ -25,8 +25,7 @@ func (u *UserHandler) GetAllUsers(ctx *gin.Context) {
 	list, err := models.User{}.GetAll()
 	if err != nil {
 		log.Logger.Sugar().Error("error: ", err.Error())
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.ServerError,
+		ctx.JSON(http.StatusInternalServerError, utils.Result{
 			Msg:  "服务器端错误",
 			Data: nil,
 		})
@@ -34,7 +33,6 @@ func (u *UserHandler) GetAllUsers(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.Result{
-		Code: utils.Success,
 		Msg:  "查询成功",
 		Data: list,
 	})
@@ -52,8 +50,7 @@ func (u *UserHandler) GetAllUsers(ctx *gin.Context) {
 func (u *UserHandler) UpdateUser(ctx *gin.Context) {
 	userForm := forms.UserInfoForm{}
 	if err := ctx.ShouldBindJSON(&userForm); err != nil {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  utils.GetFormError(err),
 			Data: nil,
 		})
@@ -63,8 +60,7 @@ func (u *UserHandler) UpdateUser(ctx *gin.Context) {
 	user := userForm.BindToModel()
 	if err := user.Update(); err != nil {
 		log.Logger.Sugar().Error("error: ", err.Error())
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.ServerError,
+		ctx.JSON(http.StatusInternalServerError, utils.Result{
 			Msg:  "服务器端错误",
 			Data: nil,
 		})
@@ -72,7 +68,6 @@ func (u *UserHandler) UpdateUser(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.Result{
-		Code: utils.Success,
 		Msg:  "修改成功",
 		Data: nil,
 	})
@@ -90,8 +85,7 @@ func (u *UserHandler) UpdateUser(ctx *gin.Context) {
 func (u *UserHandler) UpdateUserPwd(ctx *gin.Context) {
 	pwdForm := forms.PwdForm{}
 	if err := ctx.ShouldBindJSON(&pwdForm); err != nil {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  utils.GetFormError(err),
 			Data: nil,
 		})
@@ -101,8 +95,7 @@ func (u *UserHandler) UpdateUserPwd(ctx *gin.Context) {
 	oldUser, err := models.User{Username: pwdForm.Username}.GetByUsername()
 	if err != nil {
 		log.Logger.Sugar().Error("error: ", err.Error())
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.ServerError,
+		ctx.JSON(http.StatusInternalServerError, utils.Result{
 			Msg:  "服务器端错误",
 			Data: nil,
 		})
@@ -110,8 +103,7 @@ func (u *UserHandler) UpdateUserPwd(ctx *gin.Context) {
 	}
 
 	if !utils.VerifyPwd(oldUser.Pwd, pwdForm.OldPwd) {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  "旧密码错误",
 			Data: nil,
 		})
@@ -122,8 +114,7 @@ func (u *UserHandler) UpdateUserPwd(ctx *gin.Context) {
 	err = oldUser.UpdatePwd()
 	if err != nil {
 		log.Logger.Sugar().Error("error: ", err.Error())
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.ServerError,
+		ctx.JSON(http.StatusInternalServerError, utils.Result{
 			Msg:  "服务器端错误",
 			Data: nil,
 		})
@@ -131,7 +122,6 @@ func (u *UserHandler) UpdateUserPwd(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.Result{
-		Code: utils.Success,
 		Msg:  "修改密码成功，请重新登录",
 		Data: nil,
 	})

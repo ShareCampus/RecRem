@@ -2,6 +2,8 @@ package models
 
 import "encoding/json"
 
+const TEXTEMBEDDINGSMALL = "text-embedding-3-small"
+
 type OpenAI struct {
 	Id    int    `gorm:"column:id;primary_key"`
 	Token string `gorm:"column:token"`

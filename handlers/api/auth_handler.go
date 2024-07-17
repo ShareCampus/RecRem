@@ -24,29 +24,25 @@ func (a *AuthHandler) Health(ctx *gin.Context) {
 func (a *AuthHandler) Register(ctx *gin.Context) {
 	regForm := forms.RegisterForm{}
 	result := utils.Result{
-		Code: utils.Success,
 		Msg:  "注册成功",
 		Data: nil,
 	}
 	if err := ctx.ShouldBindJSON(&regForm); err != nil { // 表单校验失败
-		result.Code = utils.RequestError     // 请求数据有误
 		result.Msg = utils.GetFormError(err) // 获取表单错误信息
-		ctx.JSON(http.StatusOK, result)
+		ctx.JSON(http.StatusBadRequest, result)
 		return
 	}
 	user := regForm.BindToModel() // 绑定表单数据到用户
 	u, _ := user.GetByUsername()  // 根据用户名获取用户
 	if u.Username != "" {         // 账号已经被注册
-		result.Code = utils.RequestError
 		result.Msg = "账号已经被注册"
-		ctx.JSON(http.StatusOK, result)
+		ctx.JSON(http.StatusBadRequest, result)
 		return
 	}
 	if err := user.Create(); err != nil { // 创建用户 + 异常处理
 		log.Logger.Sugar().Error("error: ", err.Error())
-		result.Code = utils.ServerError
 		result.Msg = "服务器端错误"
-		ctx.JSON(http.StatusOK, result) // 返回 json
+		ctx.JSON(http.StatusInternalServerError, result) // 返回 json
 		return
 	}
 	ctx.JSON(http.StatusOK, result)
@@ -55,14 +51,12 @@ func (a *AuthHandler) Register(ctx *gin.Context) {
 func (a *AuthHandler) Login(ctx *gin.Context) {
 	loginForm := forms.LoginForm{}
 	result := utils.Result{ // 定义 api 返回信息结构
-		Code: utils.Success,
 		Msg:  "登录成功",
 		Data: nil,
 	}
 	if err := ctx.ShouldBindJSON(&loginForm); err != nil { // 表单校验失败
-		result.Code = utils.RequestError     // 请求数据有误
-		result.Msg = utils.GetFormError(err) // 获取表单错误信息
-		ctx.JSON(http.StatusOK, result)      // 返回 json
+		result.Msg = utils.GetFormError(err)             // 获取表单错误信息
+		ctx.JSON(http.StatusInternalServerError, result) // 返回 json
 		return
 	}
 	// captchaConfig := &utils.CaptchaConfig{
@@ -78,15 +72,13 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 	user := loginForm.BindToModel() // 绑定表单数据到实体类
 	u, _ := user.GetByUsername()    // 根据用户名获取用户
 	if u.Username == "" {           // 用户不存在
-		result.Code = utils.RequestError
 		result.Msg = "不存在该用户"
-		ctx.JSON(http.StatusOK, result)
+		ctx.JSON(http.StatusBadRequest, result)
 		return
 	}
 	if !utils.VerifyPwd(u.Pwd, user.Pwd) { // 密码错误
-		result.Code = utils.RequestError
 		result.Msg = "密码错误"
-		ctx.JSON(http.StatusOK, result) // 返回 json
+		ctx.JSON(http.StatusBadRequest, result) // 返回 json
 		return
 	}
 
@@ -122,16 +114,14 @@ func (a *AuthHandler) Login(ctx *gin.Context) {
 func (a *AuthHandler) CreateCaptcha(ctx *gin.Context) {
 	captcha := utils.CaptchaConfig{} // 创建验证码配置结构
 	result := utils.Result{          // 返回数据结构
-		Code: utils.Success,
 		Msg:  "验证码创建成功",
 		Data: nil,
 	}
 
 	base64, err := utils.GenerateCaptcha(&captcha) // 创建验证码
 	if err != nil {                                // 异常处理
-		result.Code = utils.ServerError
 		result.Msg = "服务器端错误"
-		ctx.JSON(http.StatusOK, result)
+		ctx.JSON(http.StatusInternalServerError, result)
 		return
 	}
 
@@ -146,8 +136,7 @@ func (a *AuthHandler) CreateCaptcha(ctx *gin.Context) {
 func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 	forgetPwdForm := forms.ForgetPwdForm{}
 	if err := ctx.ShouldBindJSON(&forgetPwdForm); err != nil {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  utils.GetFormError(err),
 			Data: nil,
 		})
@@ -156,8 +145,7 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 
 	user, _ := models.User{Email: forgetPwdForm.Email}.GetByEmail()
 	if user.Username == "" {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  "不存在该邮箱帐号",
 			Data: nil,
 		})
@@ -170,8 +158,7 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 		verifyCode, err := utils.CreateRandomCode(6)
 		if err != nil {
 			log.Logger.Sugar().Error("创建验证码失败：", err.Error())
-			ctx.JSON(http.StatusOK, utils.Result{
-				Code: utils.ServerError,
+			ctx.JSON(http.StatusInternalServerError, utils.Result{
 				Msg:  "创建验证码失败",
 				Data: nil,
 			})
@@ -199,8 +186,7 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 	err := d.DialAndSend(msg)
 	if err != nil {
 		log.Logger.Sugar().Error("验证码发送失败：", err.Error())
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.ServerError,
+		ctx.JSON(http.StatusInternalServerError, utils.Result{
 			Msg:  "验证码发送失败，请检查 smtp 配置",
 			Data: nil,
 		})
@@ -208,7 +194,6 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, utils.Result{
-		Code: utils.Success,
 		Msg:  "验证码发送成功，请前往邮箱查看",
 		Data: nil,
 	})
@@ -217,8 +202,7 @@ func (a *AuthHandler) ForgetPwd(ctx *gin.Context) {
 func (a *AuthHandler) ResetPwd(ctx *gin.Context) {
 	resetPwdForm := forms.ResetPwdForm{}
 	if err := ctx.ShouldBindJSON(&resetPwdForm); err != nil {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  utils.GetFormError(err),
 			Data: nil,
 		})
@@ -228,8 +212,7 @@ func (a *AuthHandler) ResetPwd(ctx *gin.Context) {
 	verifyCode := ""
 	_ = setting.Cache.Get(resetPwdForm.Email, &verifyCode)
 	if verifyCode != resetPwdForm.VerifyCode {
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.RequestError,
+		ctx.JSON(http.StatusBadRequest, utils.Result{
 			Msg:  "验证码无效或错误",
 			Data: nil,
 		})
@@ -240,8 +223,7 @@ func (a *AuthHandler) ResetPwd(ctx *gin.Context) {
 	err := user.UpdatePwd()
 	if err != nil {
 		log.Logger.Sugar().Error("error: ", err.Error())
-		ctx.JSON(http.StatusOK, utils.Result{
-			Code: utils.ServerError,
+		ctx.JSON(http.StatusInternalServerError, utils.Result{
 			Msg:  "服务器端错误",
 			Data: nil,
 		})
@@ -252,7 +234,6 @@ func (a *AuthHandler) ResetPwd(ctx *gin.Context) {
 	_ = setting.Cache.Delete(resetPwdForm.Email)
 
 	ctx.JSON(http.StatusOK, utils.Result{
-		Code: utils.Success,
 		Msg:  "重置密码成功",
 		Data: nil,
 	})

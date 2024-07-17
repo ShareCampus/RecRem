@@ -14,7 +14,8 @@ import (
 	"recrem/forms"
 	"recrem/gpt/openai"
 	"recrem/models"
-	utils "recrem/utils/similarity"
+	"recrem/utils"
+	"recrem/utils/similarity"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,58 +24,70 @@ type QueryHandler struct {
 }
 
 func (q *QueryHandler) QueryByQuestion(ctx *gin.Context) {
-	// 1. 获取问题 (user, question)
+	response := utils.Result{}
 	queryInfoForm := forms.QueryInfoForm{}
+
 	if err := ctx.ShouldBindJSON(&queryInfoForm); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		response.Msg = fmt.Sprintf("binding info form: %s", err)
+		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
+
 	userID := queryInfoForm.UserID
 	question := queryInfoForm.Question
-	ctx.String(http.StatusOK, "Data received successfully")
-	// 2. 向量化
+
 	prompt := models.EmbeddingRequest{
 		Input:          string(question),
-		Model:          "text-embedding-3-small",
+		Model:          models.TEXTEMBEDDINGSMALL,
 		EncodingFormat: "float",
 	}
+
 	resp, err := openai.O.CallEmbeddingAPI(&prompt)
 	if err != nil {
-		fmt.Println("call embedding api error", err)
+		response.Msg = fmt.Sprintf("call embedding api error: %s", err)
+		ctx.JSON(http.StatusInternalServerError, response)
+		return
 	}
+
 	// store the embedding
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		response.Msg = fmt.Sprintf("Error reading response body: %s", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	// Unmarshal the JSON data into the struct
 	var embeddingResp models.EmbeddingResponse
 	err = json.Unmarshal(body, &embeddingResp)
 	if err != nil {
-		fmt.Println("Error unmarshalling response:", err)
+		response.Msg = fmt.Sprintf("Error unmarshalling response: %s", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
 	embeddingFileArrs, err := etcd.GetVectorsThroughPrefix(userID)
 	if err != nil {
+		response.Msg = fmt.Sprintf("Error getting all user files embedding through userid: %s", err)
 		fmt.Println("Error getting all user files embedding through userid:", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	mostSimilarIndex, maxSimilarity := utils.FindMostSimilarVector(embeddingResp.Data[0].Embedding, embeddingFileArrs)
-	fmt.Printf("Most similar vector index: %d, similarity: %f\n", mostSimilarIndex, maxSimilarity)
-	return
+	mostSimilarIndex, maxSimilarity := similarity.FindMostSimilarVector(embeddingResp.Data[0].Embedding, embeddingFileArrs)
+	response.Msg = fmt.Sprintf("Most similar vector index: %d, similarity: %f\n", mostSimilarIndex, maxSimilarity)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func (q *QueryHandler) QueryByFile(ctx *gin.Context) {
+	response := utils.Result{}
 	userID := ctx.Query("user_id")
 	fmt.Println(userID)
 	ctx.Request.Body = http.MaxBytesReader(ctx.Writer, ctx.Request.Body, 10<<20)
 
-	file, handler, err := ctx.Request.FormFile("file")
+	file, handler, err := ctx.Request.FormFile("filename")
 	if err != nil {
-		ctx.String(http.StatusBadRequest, fmt.Sprintf("Error retrieving the file: %v", err))
+		response.Msg = fmt.Sprintf("Error retrieving the file: %v", err)
+		ctx.JSON(http.StatusBadRequest, response)
 		return
 	}
 	defer file.Close()
@@ -82,7 +95,8 @@ func (q *QueryHandler) QueryByFile(ctx *gin.Context) {
 	// Calculate the hash of the file content directly from the HTTP request
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, file); err != nil {
-		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error hashing the file: %v", err))
+		response.Msg = fmt.Sprintf("Error hashing the file: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	fileHash := hex.EncodeToString(hasher.Sum(nil))
@@ -96,14 +110,16 @@ func (q *QueryHandler) QueryByFile(ctx *gin.Context) {
 
 	destFile, err := os.Create(filePath)
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error creating the file: %v", err))
+		response.Msg = fmt.Sprintf("Error creating the file: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 	defer destFile.Close()
 
 	_, err = io.Copy(destFile, file)
 	if err != nil {
-		ctx.String(http.StatusInternalServerError, fmt.Sprintf("Error saving the file: %v", err))
+		response.Msg = fmt.Sprintf("Error saving the file: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
@@ -113,7 +129,8 @@ func (q *QueryHandler) QueryByFile(ctx *gin.Context) {
 	cmd := exec.Command(pythonPath, scriptPath, filePath) // ignore_security_alert RCE
 	output, err := cmd.Output()
 	if err != nil {
-		fmt.Println("Error executing script:", err)
+		response.Msg = fmt.Sprintf("Error executing script: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
@@ -121,34 +138,44 @@ func (q *QueryHandler) QueryByFile(ctx *gin.Context) {
 	// vector embedding
 	prompt := models.EmbeddingRequest{
 		Input:          string(output),
-		Model:          "text-embedding-3-small",
+		Model:          models.TEXTEMBEDDINGSMALL,
 		EncodingFormat: "float",
 	}
 	resp, err := openai.O.CallEmbeddingAPI(&prompt)
 	if err != nil {
-		fmt.Println("call embedding api error", err)
+		response.Msg = fmt.Sprintf("Call embedding API error: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
+		return
 	}
+
 	// store the embedding
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response body:", err)
+		response.Msg = fmt.Sprintf("Error reading response body: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
 	var embeddingResp models.EmbeddingResponse
 	err = json.Unmarshal(body, &embeddingResp)
 	if err != nil {
-		fmt.Println("Error unmarshalling response:", err)
+		response.Msg = fmt.Sprintf("Error unmarshalling response: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
 	embeddingFileArrs, err := etcd.GetVectorsThroughPrefix(userID)
 	if err != nil {
-		fmt.Println("Error getting all user files embedding through userid:", err)
+		response.Msg = fmt.Sprintf("Error getting all user files embedding through userID: %v", err)
+		ctx.JSON(http.StatusInternalServerError, response)
 		return
 	}
 
-	mostSimilarIndex, maxSimilarity := utils.FindMostSimilarVector(embeddingResp.Data[0].Embedding, embeddingFileArrs)
-	fmt.Printf("Most similar vector index: %d, similarity: %f\n", mostSimilarIndex, maxSimilarity)
-	return
+	mostSimilarIndex, maxSimilarity := similarity.FindMostSimilarVector(embeddingResp.Data[0].Embedding, embeddingFileArrs)
+	response.Msg = fmt.Sprintf("Most similar vector index: %d, similarity: %f\n", mostSimilarIndex, maxSimilarity)
+	response.Data = map[string]interface{}{
+		"mostSimilarIndex": mostSimilarIndex,
+		"maxSimilarity":    maxSimilarity,
+	}
+	ctx.JSON(http.StatusOK, response)
 }

@@ -11,7 +11,6 @@ const (
 
 // Result RestFulApi 返回信息结构
 type Result struct {
-	Code int         `json:"code" example:"100"` // 状态码
 	Msg  string      `json:"msg" example:"密码错误"` // 提示
 	Data interface{} `json:"data"`               // 数据
 }

@@ -20,8 +20,7 @@ func InitBucket(fillInternal time.Duration, capacity int64) {
 func Limiter() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if bucket.TakeAvailable(1) < 1 {
-			ctx.JSON(http.StatusOK, utils.Result{
-				Code: utils.Forbidden,
+			ctx.JSON(http.StatusForbidden, utils.Result{
 				Msg:  "您的访问过于频繁！",
 				Data: nil,
 			})

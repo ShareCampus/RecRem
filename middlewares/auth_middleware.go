@@ -19,15 +19,14 @@ func JWTAuth() gin.HandlerFunc {
 			return
 		}
 		result := utils.Result{ // 封装返回体内容
-			Code: utils.Forbidden, // 状态码
-			Msg:  "",              // 提示信息
-			Data: nil,             // 数据
+			Msg:  "",  // 提示信息
+			Data: nil, // 数据
 		}
 
 		if token == "" { // token 为空
-			result.Msg = "请求未携带 Token，无权访问"
-			ctx.JSON(http.StatusOK, result) // 返回 json
-			ctx.Abort()                     // 停止处理 handler
+			result.Msg = "请求未携带 Token, 无权访问"
+			ctx.JSON(http.StatusForbidden, result) // 返回 json
+			ctx.Abort()                            // 停止处理 handler
 			return
 		}
 
