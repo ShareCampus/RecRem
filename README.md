@@ -12,5 +12,5 @@ Recommend all you Remember
 - Mysql
 - Raft
 - MangoDB
-- [weaviate](https://github.com/weaviate/weaviate?tab=readme-ov-file)
+- OpenAI
 - [etcd](https://github.com/etcd-io/etcd)
