@@ -26,3 +26,4 @@ TestResults.xml
 
 *.log
 .DS_Store
+./test/
